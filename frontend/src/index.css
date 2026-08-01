@@ -1,0 +1,82 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "tailwindcss";
+@theme {
+  --color-ink: #0d1a16;
+  --color-inkdeep: #081210;
+  --color-sage: #7fa98f;
+  --color-sagedim: #5e8570;
+  --color-amber: #d9a441;
+  --color-ambersoft: #e8c27a;
+  --color-parchment: #edebe2;
+  --color-parchdim: #dfdccf;
+
+  --font-display: "Fraunces", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+}
+.font-display {
+  font-family: "Fraunces", serif;
+}
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+
+@keyframes pulse-draw {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+.pulse-line {
+  stroke-dasharray: 1000;
+  animation: pulse-draw 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.drift {
+  animation: drift 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-line,
+  .drift {
+    animation: none;
+  }
+}
+
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: #d9a441;
+}
+
+.input-field {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input-field:focus {
+  border-color: #d9a441;
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.15);
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid #d9a441;
+  outline-offset: 2px;
+}
