@@ -12,7 +12,9 @@ const connectDb = require("./libs/Db");
 const authRoute = require("./routes/authRoute");
 const testRoute = require("./routes/testRoute");
 const submitRoute = require("./routes/submitRoute");
-
+const jwt = require("jsonwebtoken");
+const isLoggedIn = require('./services/authService');
+const UserModel = require('./Models/UserModel');
 
 const app = express();
 app.use(cors({
@@ -26,6 +28,18 @@ app.use(cookieParser());
 app.use("/api/auth", authRoute);
 app.use("/api", testRoute);
 app.use("/api/quiz" , submitRoute); 
+
+app.get("/api/auth/me" , isLoggedIn ,  async(req ,res) => {
+      try{
+        const user = await UserModel.findById(req.user.id).select("-password");
+
+        res.json(user);
+
+      }catch(err){
+        console.log(err);
+        res.status(500).json({message: "Internal server error"});
+      }
+});
 
 
 

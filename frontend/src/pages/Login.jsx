@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const { user, setuser , fetchuser} = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const justRegistered = location.state?.justRegistered;
@@ -11,10 +13,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     // TODO: wire up to your auth endpoint
-    console.log({ email, password, keepLoggedIn });
+    console.log({ email, password});
+    const data = await fetch("http://localhost:3000/api/auth/login" , {
+      method: "POST",
+      headers:{
+          "content-type": "application/json"
+      } ,
+      credentials: "include",
+      body: JSON.stringify({email, password})
+      
+    });
+     await fetchuser();
+   navigate("/dashboard");
+
   };
 
   return (
