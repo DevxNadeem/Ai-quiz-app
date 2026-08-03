@@ -15,6 +15,7 @@ const submitRoute = require("./routes/submitRoute");
 const jwt = require("jsonwebtoken");
 const isLoggedIn = require('./services/authService');
 const UserModel = require('./Models/UserModel');
+const quizModel = require('./Models/quizModel');
 
 const app = express();
 app.use(cors({
@@ -32,13 +33,52 @@ app.use("/api/quiz" , submitRoute);
 app.get("/api/auth/me" , isLoggedIn ,  async(req ,res) => {
       try{
         const user = await UserModel.findById(req.user.id).select("-password");
-
+         
         res.json(user);
 
       }catch(err){
         console.log(err);
         res.status(500).json({message: "Internal server error"});
       }
+});
+
+app.get("/api/quiz/all" , isLoggedIn , async(req , res) => {
+    try{
+       const quizzes = await quizModel
+    .find({ userId: req.user.id })
+    .select("topic difficulty numberOfQuestions createdAt")
+    
+        
+    res.json(quizzes);
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message: "Internal server error"});
+    }
+
+});
+app.get("/api/quiz/information/:id", isLoggedIn, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const quizData = await quizModel.findById(id);
+
+        if (!quizData) {
+            return res.status(404).json({
+                message: "Quiz not found"
+            });
+        }
+
+        return res.status(200).json({
+            quiz: quizData
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
 });
 
 

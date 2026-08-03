@@ -16,6 +16,7 @@ export const AuthContextProvider = ({ children }) => {
                 return;
             }
             const userData = await res.json();
+            //console.log(userData);
             setuser(userData);
         } catch (err) {
             console.log(err);
@@ -28,7 +29,7 @@ export const AuthContextProvider = ({ children }) => {
 
     useEffect(() => {
         fetchuser();
-    }, [user]);
+    }, []);
 
     return (
         <AuthContext.Provider value={{ user, setuser, fetchuser  , loading}}>
