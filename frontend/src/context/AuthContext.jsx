@@ -5,6 +5,7 @@ const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
     const [user, setuser] = useState(null);
     const [loading, setLoading] = useState(true);
+
     const fetchuser = async () => {
         try {
             const res = await fetch("http://localhost:3000/api/auth/me", {
@@ -16,13 +17,11 @@ export const AuthContextProvider = ({ children }) => {
                 return;
             }
             const userData = await res.json();
-            //console.log(userData);
             setuser(userData);
         } catch (err) {
             console.log(err);
             setuser(null);
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
     };
@@ -32,7 +31,7 @@ export const AuthContextProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setuser, fetchuser  , loading}}>
+        <AuthContext.Provider value={{ user, setuser, fetchuser, loading }}>
             {children}
         </AuthContext.Provider>
     );

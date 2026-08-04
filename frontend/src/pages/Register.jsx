@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const getStrength = (value) => {
     let score = 0;
@@ -22,29 +24,42 @@ export default function Register() {
   const strengthLabels = ["Password strength", "Weak", "Fair", "Strong", "Strong"];
   const strengthColors = ["#DFDCCF", "#D9A441", "#D9A441", "#7FA98F"];
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ name, email, password});
-    // TODO: wire up to your auth endpoint
-   const data =  await fetch("http://localhost:3000/api/auth/register" , {
-        method: "POST",
-        headers:{
-            "content-type": "application/json"
-        } , 
-        credentials: "include",
-        body: JSON.stringify({name, email, password})
-    }); 
-     
-     console.log("User registered successfully" , data);
+    setError("");
 
-      navigate("/login");
-    
+    if (!agreed) {
+      setError("You must agree to the Terms and Privacy Policy.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError(data.message || "Registration failed.");
+        return;
+      }
+
+      navigate("/login", { state: { justRegistered: true } });
+    } catch {
+      setError("Network error. Is the server running?");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="bg-parchment text-ink antialiased min-h-screen">
       <div className="min-h-screen grid lg:grid-cols-2">
-        {/* LEFT: brand panel */}
         <div className="hidden lg:flex flex-col justify-between bg-ink text-parchment px-14 py-12 relative overflow-hidden">
           <Link to="/" className="flex items-center gap-2.5 relative z-10">
             <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
@@ -89,7 +104,6 @@ export default function Register() {
           </div>
         </div>
 
-        {/* RIGHT: form */}
         <div className="flex items-center justify-center px-6 py-12 sm:px-10">
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-10 flex items-center gap-2.5">
@@ -109,6 +123,12 @@ export default function Register() {
 
             <h2 className="font-display text-3xl font-medium tracking-tight">Create your account</h2>
             <p className="text-ink/55 text-sm mt-2 mb-8">Free forever plan. No card required.</p>
+
+            {error && (
+              <p className="text-sm rounded-xl px-4 py-3 mb-5 bg-red-50 text-red-700 border border-red-200">
+                {error}
+              </p>
+            )}
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
@@ -192,22 +212,18 @@ export default function Register() {
                 />
                 <span>
                   I agree to the{" "}
-                  <a href="#" className="text-ink font-medium underline underline-offset-2">
-                    Terms
-                  </a>{" "}
+                  <a href="#" className="text-ink font-medium underline underline-offset-2">Terms</a>{" "}
                   and{" "}
-                  <a href="#" className="text-ink font-medium underline underline-offset-2">
-                    Privacy Policy
-                  </a>
-                  .
+                  <a href="#" className="text-ink font-medium underline underline-offset-2">Privacy Policy</a>.
                 </span>
               </label>
 
               <button
                 type="submit"
-                className="w-full bg-ink text-parchment font-semibold py-3.5 rounded-xl hover:bg-inkdeep transition text-sm"
+                disabled={submitting}
+                className="w-full bg-ink text-parchment font-semibold py-3.5 rounded-xl hover:bg-inkdeep transition text-sm disabled:opacity-60"
               >
-                Create account
+                {submitting ? "Creating account…" : "Create account"}
               </button>
             </form>
 
@@ -219,9 +235,7 @@ export default function Register() {
 
             <p className="text-center text-sm text-ink/55 mt-8">
               Already have an account?{" "}
-              <Link to="/login" className="text-ink font-semibold underline underline-offset-2">
-                Log in
-              </Link>
+              <Link to="/login" className="text-ink font-semibold underline underline-offset-2">Log in</Link>
             </p>
           </div>
         </div>

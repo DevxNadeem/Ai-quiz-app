@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const { user, setuser , fetchuser} = useAuth();
+  const { fetchuser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const justRegistered = location.state?.justRegistered;
@@ -12,29 +12,41 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: wire up to your auth endpoint
-    console.log({ email, password});
-    const data = await fetch("http://localhost:3000/api/auth/login" , {
-      method: "POST",
-      headers:{
-          "content-type": "application/json"
-      } ,
-      credentials: "include",
-      body: JSON.stringify({email, password})
-      
-    });
-     await fetchuser();
-   navigate("/dashboard");
+    setError("");
+    setSubmitting(true);
 
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError(data.message || "Invalid email or password.");
+        return;
+      }
+
+      await fetchuser();
+      navigate("/dashboard");
+    } catch {
+      setError("Network error. Is the server running?");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="bg-parchment text-ink antialiased min-h-screen">
       <div className="min-h-screen grid lg:grid-cols-2">
-        {/* LEFT: brand panel */}
         <div className="hidden lg:flex flex-col justify-between bg-ink text-parchment px-14 py-12 relative overflow-hidden">
           <Link to="/" className="flex items-center gap-2.5 relative z-10">
             <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
@@ -79,7 +91,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* RIGHT: form */}
         <div className="flex items-center justify-center px-6 py-12 sm:px-10">
           <div className="w-full max-w-sm">
             <div className="lg:hidden mb-10 flex items-center gap-2.5">
@@ -108,6 +119,12 @@ export default function Login() {
                 </svg>
                 Account created. Log in to continue.
               </div>
+            )}
+
+            {error && (
+              <p className="text-sm rounded-xl px-4 py-3 mb-6 bg-red-50 text-red-700 border border-red-200">
+                {error}
+              </p>
             )}
 
             <form className="space-y-5" onSubmit={handleSubmit}>
@@ -171,9 +188,10 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-ink text-parchment font-semibold py-3.5 rounded-xl hover:bg-inkdeep transition text-sm"
+                disabled={submitting}
+                className="w-full bg-ink text-parchment font-semibold py-3.5 rounded-xl hover:bg-inkdeep transition text-sm disabled:opacity-60"
               >
-                Log in
+                {submitting ? "Logging in…" : "Log in"}
               </button>
             </form>
 
@@ -185,28 +203,17 @@ export default function Login() {
 
             <button className="w-full flex items-center justify-center gap-2.5 border border-ink/15 rounded-xl py-3 text-sm font-medium hover:bg-parchdim/60 transition">
               <svg width="18" height="18" viewBox="0 0 18 18">
-                <path
-                  fill="#4285F4"
-                  d="M17.6 9.2c0-.6-.05-1.2-.15-1.75H9v3.3h4.8a4.1 4.1 0 01-1.78 2.7v2.2h2.9c1.7-1.55 2.68-3.85 2.68-6.45z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M9 18c2.4 0 4.42-.8 5.9-2.15l-2.9-2.2c-.8.55-1.85.85-3 .85-2.3 0-4.25-1.55-4.95-3.65H1.05v2.3A9 9 0 009 18z"
-                />
+                <path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.15-1.75H9v3.3h4.8a4.1 4.1 0 01-1.78 2.7v2.2h2.9c1.7-1.55 2.68-3.85 2.68-6.45z" />
+                <path fill="#34A853" d="M9 18c2.4 0 4.42-.8 5.9-2.15l-2.9-2.2c-.8.55-1.85.85-3 .85-2.3 0-4.25-1.55-4.95-3.65H1.05v2.3A9 9 0 009 18z" />
                 <path fill="#FBBC05" d="M4.05 10.85a5.4 5.4 0 010-3.7v-2.3H1.05a9 9 0 000 8.3l3-2.3z" />
-                <path
-                  fill="#EA4335"
-                  d="M9 3.58c1.3 0 2.48.45 3.4 1.33l2.55-2.55C13.4.9 11.4 0 9 0A9 9 0 001.05 4.85l3 2.3C4.75 5.05 6.7 3.58 9 3.58z"
-                />
+                <path fill="#EA4335" d="M9 3.58c1.3 0 2.48.45 3.4 1.33l2.55-2.55C13.4.9 11.4 0 9 0A9 9 0 001.05 4.85l3 2.3C4.75 5.05 6.7 3.58 9 3.58z" />
               </svg>
               Continue with Google
             </button>
 
             <p className="text-center text-sm text-ink/55 mt-8">
               Don't have an account?{" "}
-              <Link to="/register" className="text-ink font-semibold underline underline-offset-2">
-                Sign up
-              </Link>
+              <Link to="/register" className="text-ink font-semibold underline underline-offset-2">Sign up</Link>
             </p>
           </div>
         </div>
