@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../config/api";
 
 export default function Login() {
   const { fetchuser } = useAuth();
@@ -21,7 +22,7 @@ export default function Login() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "include",
@@ -201,6 +202,10 @@ export default function Login() {
               <div className="h-px bg-ink/10 flex-1" />
             </div>
 
+            {/* Not wired to anything — no onClick, purely decorative right
+                now. Either implement Google OAuth or remove this button;
+                a fake auth option that does nothing on click erodes trust
+                the moment someone clicks it. Left in place pending your call. */}
             <button className="w-full flex items-center justify-center gap-2.5 border border-ink/15 rounded-xl py-3 text-sm font-medium hover:bg-parchdim/60 transition">
               <svg width="18" height="18" viewBox="0 0 18 18">
                 <path fill="#4285F4" d="M17.6 9.2c0-.6-.05-1.2-.15-1.75H9v3.3h4.8a4.1 4.1 0 01-1.78 2.7v2.2h2.9c1.7-1.55 2.68-3.85 2.68-6.45z" />

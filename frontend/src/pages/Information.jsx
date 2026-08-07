@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 function Information() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ function Information() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:3000/api/quiz/information/${params.id}`, {
+      const res = await fetch(`${API_BASE}/api/quiz/information/${params.id}`, {
         method: "GET",
         credentials: "include",
       });
@@ -81,6 +82,10 @@ function Information() {
               <p className="text-gray-500 text-sm">Questions</p>
               <h3 className="text-lg font-semibold mt-1">{quiz.numberOfQuestions}</h3>
             </div>
+            {/* Total Marks currently just repeats numberOfQuestions — was
+                flagged as likely meant to be numberOfQuestions * some
+                weight. Left as-is; tell me the intended scoring model
+                if you want this to show something different. */}
             <div className="border rounded-xl p-4">
               <p className="text-gray-500 text-sm">Total Marks</p>
               <h3 className="text-lg font-semibold mt-1">{quiz.numberOfQuestions}</h3>

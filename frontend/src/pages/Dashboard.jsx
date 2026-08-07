@@ -1,16 +1,12 @@
-import React, { useContext, useEffect } from "react";
-import { QuizContext } from "../context/QuizContext";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuizForm } from "../context/QuizFormContext";
+import { useQuizList } from "../context/QuizListContext";
 
 function Dashboard() {
-  const {
-    formData, setFormData, submitting, quizzes, loadingQuizzes,
-    expandedId, setExpandedId, error, fetchQuizzes, handleSubmit,
-  } = useContext(QuizContext);
-
-  useEffect(() => {
-    fetchQuizzes();
-  }, []);
-
+  const { formData, setFormData, submitting, error, handleSubmit } = useQuizForm();
+  const { quizzes, loadingQuizzes, expandedId, setExpandedId } = useQuizList();
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -121,7 +117,7 @@ function Dashboard() {
                   type="number"
                   name="numberOfQuestions"
                   min="1"
-                  max="20"
+                  max="25"
                   value={formData.numberOfQuestions}
                   onChange={handleChange}
                   className="w-full text-center rounded-xl px-4 py-3 outline-none font-mono"
@@ -132,7 +128,7 @@ function Dashboard() {
                   onClick={() =>
                     setFormData({
                       ...formData,
-                      numberOfQuestions: Math.min(20, Number(formData.numberOfQuestions) + 1),
+                      numberOfQuestions: Math.min(25, Number(formData.numberOfQuestions) + 1),
                     })
                   }
                   className="w-10 h-10 rounded-xl font-mono text-lg flex items-center justify-center shrink-0"
@@ -221,14 +217,13 @@ function Dashboard() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => setExpandedId(isOpen ? null : quiz._id)}
+                        onClick={() => navigate(`/quiz/test/info/${quiz._id}`)}
                         className="text-sm font-medium px-4 py-2 rounded-lg shrink-0"
                         style={{ border: "1px solid #EDEBE6", color: "#14142B" }}
                       >
-                        {isOpen ? "Hide" : "Show analysis"}
+                        Take quiz
                       </button>
                     </div>
-                    {/* rest unchanged */}
                   </div>
                 );
               })}

@@ -2,9 +2,12 @@ import React from "react";
 
 function QuestionCard({ question, index, selectedAnswer, onSelect }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
-      <h2 className="text-xl font-semibold mb-5">Question {index}</h2>
-      <p className="text-lg mb-6">{question.question}</p>
+    <div className="bg-white rounded-2xl shadow p-8">
+      <h2 className="text-xl font-bold mb-6">
+        Question {index}
+      </h2>
+
+      <p className="text-lg mb-8">{question.question}</p>
 
       <div className="space-y-4">
         {question.options.map((option, i) => (
@@ -15,10 +18,11 @@ function QuestionCard({ question, index, selectedAnswer, onSelect }) {
             <input
               type="radio"
               name={`question-${index}`}
-              value={option}
-              checked={selectedAnswer === option}
-              onChange={() => onSelect(option)}
+              value={i}
+              checked={selectedAnswer === i}
+              onChange={() => onSelect(i)}
             />
+
             <span>{option}</span>
           </label>
         ))}

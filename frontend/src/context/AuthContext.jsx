@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { API_BASE } from "../config/api";
 
 const AuthContext = createContext();
 
@@ -6,11 +7,12 @@ export const AuthContextProvider = ({ children }) => {
     const [user, setuser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchuser = async () => {
+    const fetchuser = async (signal) => {
         try {
-            const res = await fetch("http://localhost:3000/api/auth/me", {
+            const res = await fetch(`${API_BASE}/api/auth/me`, {
                 method: "GET",
-                credentials: "include"
+                credentials: "include",
+                signal,
             });
             if (!res.ok) {
                 setuser(null);
@@ -19,15 +21,18 @@ export const AuthContextProvider = ({ children }) => {
             const userData = await res.json();
             setuser(userData);
         } catch (err) {
+            if (err.name === "AbortError") return;
             console.log(err);
             setuser(null);
         } finally {
-            setLoading(false);
+            if (!signal?.aborted) setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchuser();
+        const controller = new AbortController();
+        fetchuser(controller.signal);
+        return () => controller.abort();
     }, []);
 
     return (
@@ -37,5 +42,13 @@ export const AuthContextProvider = ({ children }) => {
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
-
+export const useAuth = () => {
+    const ctx = useContext(AuthContext);
+    if (!ctx) {
+        // Was silently returning undefined before — the first symptom
+        // was always three files away from the actual mistake
+        // (a component rendered outside the provider).
+        throw new Error("useAuth must be used within AuthContextProvider");
+    }
+    return ctx;
+};

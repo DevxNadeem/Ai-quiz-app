@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import QuestionCard from "../components/QuizCard";
+import { API_BASE } from "../config/api";
 
 function TestLayout() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ function TestLayout() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:3000/api/quiz/information/${id}`, {
+      const res = await fetch(`${API_BASE}/api/quiz/information/${id}`, {
         method: "GET",
         credentials: "include",
       });
@@ -65,14 +66,14 @@ function TestLayout() {
     setSubmitting(true);
     setError("");
     try {
-      // Payload shape here is a design choice, not a backend contract —
-      // Submit controller just forwards this array into an LLM prompt.
-      const payload = questions.map((q, i) => ({
-        question: q.question,
-        selectedAnswer: answers[i] ?? null,
-      }));
+      // Was: questions.map((q, i) => ({ question: q.question, selectedAnswer: answers[i] ?? null }))
+      // submitController does String(answers[i]) directly on each array
+      // element — it expects the raw selected-answer string, not an
+      // object. The old shape stringified to "[object Object]" for
+      // every question, so nothing would ever grade correct.
+      const payload = questions.map((_, i) => answers[i] ?? "");
 
-      const res = await fetch(`http://localhost:3000/api/quiz/${id}`, {
+      const res = await fetch(`${API_BASE}/api/quiz/${id}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "include",
@@ -80,7 +81,8 @@ function TestLayout() {
       });
 
       if (!res.ok) {
-        setError("Failed to submit quiz.");
+        const err = await res.json().catch(() => ({}));
+        setError(err.message || "Failed to submit quiz.");
         return;
       }
 
